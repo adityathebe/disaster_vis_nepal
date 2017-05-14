@@ -1,7 +1,8 @@
 var circleCol  = [];
 var slider, myP;
-var columns;
+var columns, slValue;
 var custom_column = []
+var generate;
 
 function preload() {
 	table = loadTable("data.csv", "csv", "header");
@@ -13,13 +14,10 @@ function setup() {
 	var eachRow = []
 	var rows = table.rows;
 	
+	// Arranging and Storing Data
 	rows.forEach(function(row) {
 		eachRow.push(row.arr);
 	})
-
-	for (var i = 0; i < eachRow.length-1; i++) {
-		circleCol.push(new Circle(eachRow[i]));
-	}
 	
 	for (var i = 0; i < columns.length; i++) {
 		var temp_col = []
@@ -29,12 +27,22 @@ function setup() {
 		custom_column.push(temp_col)
 	}
 
+	generate = function () {
+		// Creating Circles
+		circleCol = [];
+		for (var i = 0; i < eachRow.length-1; i++) {
+			circleCol.push(new Circle(eachRow[i]));
+		}
+	}
+
+	generate();
+
 	textStyle(ITALIC);
 	textAlign(CENTER);
 
 	// DOM ELements
 	myP = createElement('h2', 'Waiting.');
-	slider = createSlider(1, columns.length -1, 2, 1);
+	slider = createSlider(1, columns.length -1, 1, 1);
 }
 
 function draw() {
@@ -66,15 +74,16 @@ function Circle(dataArr) {
 		this.move();
 		slValue = slider.value();
 		var max = findMax(custom_column[slValue]);
+		var min = findMin(custom_column[slValue]);
 		myP.html(columns[slValue]);
-		this.r = map(dataArr[slValue], 0 , max, 24, 100);
+		this.r = map(dataArr[slValue], min , max, 5, 100);
 	}
 
 	this.hover = function() {
 		var distance = dist(this.x, this.y, mouseX, mouseY)
 		if(distance <= this.r /2) {
 			textSize(20);
-			text(this.value, mouseX, mouseY)
+			text(this.value + ' - ' + this.content[slValue], mouseX, mouseY)
 		}
 	}
 
@@ -97,4 +106,25 @@ function findMax(arr) {
 		}
 	}
 	return maxval;
+}
+
+function findMin(arr) {
+	var test = 0;
+	var maxval = 0;
+	var temp;
+	for (var i = 1; i < arr.length - 1; i++) {
+		temp = parseInt(arr[i]);
+		if(temp < test){
+			maxval = arr[i];
+			test = maxval; 
+		}
+	}
+	return maxval;
+}
+
+
+function keyPressed() {
+	if(keyCode === ENTER) {
+		generate();
+	}
 }
